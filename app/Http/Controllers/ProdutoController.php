@@ -3,6 +3,8 @@
 namespace App\Http\Controllers;
 
 use App\Models\Produto;
+use App\Models\Unidade;
+use App\Models\Item;
 use Illuminate\Http\Request;
 
 class ProdutoController extends Controller
@@ -12,9 +14,19 @@ class ProdutoController extends Controller
      *
      * @return \Illuminate\Http\Response
      */
-    public function index()
+    public function index(Request $request)
     {
-        
+        $produtos = Item::with(['produtoDetalhe'])->paginate(10);
+        // foreach ($produtos as $key => $produto) {
+        //     $produto_detalhe = ProdutoDetalhe::where('produto_id', $produto->id)->first();
+        //     if (isset($produto_detalhe)) {
+        //         $produtos[$key]['comprimento'] = $produto_detalhe->comprimento;
+        //         $produtos[$key]['largura'] = $produto_detalhe->largura;
+        //         $produtos[$key]['altura'] = $produto_detalhe->altura;
+        //     }
+        // }
+
+        return view('app.produto.index', ['produtos' => $produtos, 'request' => $request->all()]);
     }
 
     /**
@@ -24,7 +36,8 @@ class ProdutoController extends Controller
      */
     public function create()
     {
-        //
+        $unidades = Unidade::All();
+        return view('app.produto.create', ['unidades' => $unidades]);
     }
 
     /**
@@ -35,7 +48,21 @@ class ProdutoController extends Controller
      */
     public function store(Request $request)
     {
-        //
+        $regras = [
+            'nome' => 'min:2|max:40',
+            'descricao' => 'required',
+            'peso' => 'required| integer',
+            'unidade_id' => 'exists:unidades,id'
+        ];
+        $feedback = [
+            'nome.min' => 'Campo nome precisa pelo menos de 2 caracteres',
+            'required' => 'O campo :attribute é obrigatório',
+            'integer' => 'O campo deve ser um valor inteiro',
+            'exists' => 'Campo invalido'
+        ];
+        $request->validate($regras, $feedback);
+        Produto::Create($request->all());
+        return redirect()->route('produto.index');
     }
 
     /**
@@ -46,7 +73,7 @@ class ProdutoController extends Controller
      */
     public function show(Produto $produto)
     {
-        //
+        return view('app.produto.show', ['produto' => $produto]);
     }
 
     /**
@@ -57,7 +84,8 @@ class ProdutoController extends Controller
      */
     public function edit(Produto $produto)
     {
-        //
+        $unidades = Unidade::all();
+        return view('app.produto.edit', ['produto' => $produto, 'unidades' => $unidades]);
     }
 
     /**
@@ -69,7 +97,8 @@ class ProdutoController extends Controller
      */
     public function update(Request $request, Produto $produto)
     {
-        //
+        $produto->update($request->all());
+        return redirect()->route('produto.show', ['produto' => $produto->id]);
     }
 
     /**
@@ -80,6 +109,7 @@ class ProdutoController extends Controller
      */
     public function destroy(Produto $produto)
     {
-        //
+        $produto->delete();
+        return redirect()->route('produto.index');
     }
 }

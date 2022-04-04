@@ -12,37 +12,40 @@ use Illuminate\Support\Facades\Route;
 |
 */
 // chamando function principal do PrincipalController
-Route::get('/', [\App\Http\Controllers\PrincipalController::class,'principal'])
-->name('site.index');
+Route::get('/', [\App\Http\Controllers\PrincipalController::class, 'principal'])
+    ->name('site.index');
 
 // chamando function sobreNos do SobreNosController
-Route::get('/sobre-nos',[App\Http\Controllers\SobreNosController::class,'sobreNos'])->name('site.sobrenos');
+Route::get('/sobre-nos', [App\Http\Controllers\SobreNosController::class, 'sobreNos'])->name('site.sobrenos');
 
 // chamando function contato do ContatoController
-Route::get('/contato', [App\Http\Controllers\ContatoController::class,'contato'])->name('site.contato');
-Route::post('/contato', [App\Http\Controllers\ContatoController::class,'contato'])->name('site.contato');
-Route::post('/contato', [App\Http\Controllers\ContatoController::class,'salvar'])->name('site.contato');
-Route::get('/login{erro?}',[App\Http\Controllers\LoginController::class,'index'])->name('site.login');
-Route::post('/login',[App\Http\Controllers\LoginController::class,'autenticacao'])->name('site.login');
+Route::get('/contato', [App\Http\Controllers\ContatoController::class, 'contato'])->name('site.contato');
+Route::post('/contato', [App\Http\Controllers\ContatoController::class, 'contato'])->name('site.contato');
+Route::post('/contato', [App\Http\Controllers\ContatoController::class, 'salvar'])->name('site.contato');
+Route::get('/login{erro?}', [App\Http\Controllers\LoginController::class, 'index'])->name('site.login');
+Route::post('/login', [App\Http\Controllers\LoginController::class, 'autenticacao'])->name('site.login');
 
-Route::prefix('/app')->middleware('autenticacao:padrao,visitante')->group(function(){
-    Route::get('/home',[App\Http\Controllers\HomeController::class,'index'])->name('app.home');
-    Route::get('/sair',[App\Http\Controllers\LoginController::class,'sair'])->name('app.sair');
-    Route::get('/cliente',[App\Http\Controllers\ClienteController::class,'index'])->name('app.cliente');
-    
-    Route::get('/fornecedor', [App\Http\Controllers\FornecedorController::class,'index'])->name('app.fornecedor');
-    Route::post('/fornecedor/listar', [App\Http\Controllers\FornecedorController::class,'listar'])->name('app.fornecedor.listar');
-    Route::get('/fornecedor/listar', [App\Http\Controllers\FornecedorController::class,'listar'])->name('app.fornecedor.listar');
-    Route::get('/fornecedor/adicionar', [App\Http\Controllers\FornecedorController::class,'adicionar'])->name('app.fornecedor.adicionar');
-    Route::post('/fornecedor/adicionar', [App\Http\Controllers\FornecedorController::class,'adicionar'])->name('app.fornecedor.adicionar');
-    
-    Route::get('/fornecedor/editar/{id}/{msg?}', [App\Http\Controllers\FornecedorController::class,'editar'])->name('app.fornecedor.editar');
-    Route::get('/fornecedor/excluir/{id}', [App\Http\Controllers\FornecedorController::class,'excluir'])->name('app.fornecedor.excluir');
+Route::prefix('/app')->middleware('autenticacao:padrao,visitante')->group(function () {
+    Route::get('/home', [App\Http\Controllers\HomeController::class, 'index'])->name('app.home');
+    Route::get('/sair', [App\Http\Controllers\LoginController::class, 'sair'])->name('app.sair');
+    Route::get('/cliente', [App\Http\Controllers\ClienteController::class, 'index'])->name('app.cliente');
 
-    Route::resource('produto', 'ProdutoController');
+    Route::get('/fornecedor', [App\Http\Controllers\FornecedorController::class, 'index'])->name('app.fornecedor');
+    Route::post('/fornecedor/listar', [App\Http\Controllers\FornecedorController::class, 'listar'])->name('app.fornecedor.listar');
+    Route::get('/fornecedor/listar', [App\Http\Controllers\FornecedorController::class, 'listar'])->name('app.fornecedor.listar');
+    Route::get('/fornecedor/adicionar', [App\Http\Controllers\FornecedorController::class, 'adicionar'])->name('app.fornecedor.adicionar');
+    Route::post('/fornecedor/adicionar', [App\Http\Controllers\FornecedorController::class, 'adicionar'])->name('app.fornecedor.adicionar');
+
+    Route::get('/fornecedor/editar/{id}/{msg?}', [App\Http\Controllers\FornecedorController::class, 'editar'])->name('app.fornecedor.editar');
+    Route::get('/fornecedor/excluir/{id}', [App\Http\Controllers\FornecedorController::class, 'excluir'])->name('app.fornecedor.excluir');
+
+    Route::resource('produto', 'App\Http\Controllers\ProdutoController');
+
+
+    Route::resource('produto-detalhe', 'App\Http\Controllers\ProdutoDetalheController');
 });
 
-Route::get('/teste/{p1}/{p2}', [App\Http\Controllers\TesteController::class,'teste'])->name('teste');
+Route::get('/teste/{p1}/{p2}', [App\Http\Controllers\TesteController::class, 'teste'])->name('teste');
 
 // Route::get('/rota1', function(){
 //     return 'rota1';
@@ -56,6 +59,6 @@ Route::get('/teste/{p1}/{p2}', [App\Http\Controllers\TesteController::class,'tes
 //Route::redirect('/rota2','/rota1');
 
 // caso de o usuario acessar uma pagina inexistente
-Route::fallback(function(){
+Route::fallback(function () {
     echo "rota inexistente <a href='" .  route('site.index') . "'>clique aqui</a> para retornar ";
 });
