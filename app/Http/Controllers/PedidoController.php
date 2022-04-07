@@ -2,21 +2,21 @@
 
 namespace App\Http\Controllers;
 
-use App\Models\ProdutoDetalhe;
 use Illuminate\Http\Request;
-use App\Models\Unidade;
-use App\Models\ItemDetalhe;
+use App\Models\Pedido;
+use App\Models\Cliente;
 
-class ProdutoDetalheController extends Controller
+class PedidoController extends Controller
 {
     /**
      * Display a listing of the resource.
      *
      * @return \Illuminate\Http\Response
      */
-    public function index()
+    public function index(Request $request)
     {
-        //
+        $pedidos = Pedido::paginate(10);
+        return view('app.pedido.index', ['pedidos' => $pedidos, 'request' => $request->all()]);
     }
 
     /**
@@ -26,8 +26,8 @@ class ProdutoDetalheController extends Controller
      */
     public function create()
     {
-        $unidades = Unidade::all();
-        return view('app.produto_detalhe.create', ['unidades' => $unidades]);
+        $clientes = Cliente::all();
+        return view('app.pedido.create', ['clientes' => $clientes]);
     }
 
     /**
@@ -38,7 +38,18 @@ class ProdutoDetalheController extends Controller
      */
     public function store(Request $request)
     {
-        ProdutoDetalhe::create($request->all());
+        $regras = [
+            'client_id' => 'exists:clientes,id'
+        ];
+        $feedback = [
+            'cliente_id.exists' => 'O cliente informado não existe'
+        ];
+        $request->validate($regras, $feedback);
+
+        $pedido = new Pedido();
+        $pedido->cliente_id = $request->get('cliente_id');
+        $pedido->save();
+        return redirect()->route('pedido.index');
     }
 
     /**
@@ -55,30 +66,24 @@ class ProdutoDetalheController extends Controller
     /**
      * Show the form for editing the specified resource.
      *
-     * @param  App\Models\produto_detalhe produto_detalhe
+     * @param  int  $id
      * @return \Illuminate\Http\Response
      */
     public function edit($id)
     {
-        $produto_detalhe = ItemDetalhe::with(['item'])->find($id);
-        $unidades = Unidade::all();
-        return view('app.produto_detalhe.edit', [
-            'produto_detalhe' => $produto_detalhe,
-            'unidades' => $unidades
-        ]);
+        //
     }
 
     /**
      * Update the specified resource in storage.
      *
      * @param  \Illuminate\Http\Request  $request
-     * @param  App\Models\produto_detalhe produto_detalhe
+     * @param  int  $id
      * @return \Illuminate\Http\Response
      */
-    public function update(Request $request, ProdutoDetalhe $produto_detalhe)
+    public function update(Request $request, $id)
     {
-        $produto_detalhe->update($request->All());
-        echo 'atualizado com sucesso';
+        //
     }
 
     /**

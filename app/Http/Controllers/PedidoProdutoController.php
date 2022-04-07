@@ -2,12 +2,13 @@
 
 namespace App\Http\Controllers;
 
-use App\Models\ProdutoDetalhe;
 use Illuminate\Http\Request;
-use App\Models\Unidade;
-use App\Models\ItemDetalhe;
 
-class ProdutoDetalheController extends Controller
+use App\Models\Pedido;
+use App\Models\Produto;
+use App\Models\PedidoProduto;
+
+class PedidoProdutoController extends Controller
 {
     /**
      * Display a listing of the resource.
@@ -24,10 +25,10 @@ class ProdutoDetalheController extends Controller
      *
      * @return \Illuminate\Http\Response
      */
-    public function create()
+    public function create(Pedido $pedido)
     {
-        $unidades = Unidade::all();
-        return view('app.produto_detalhe.create', ['unidades' => $unidades]);
+        $produtos = Produto::all();
+        return view('app.pedido_produto.create', ['pedido' => $pedido, 'produtos' => $produtos]);
     }
 
     /**
@@ -36,9 +37,21 @@ class ProdutoDetalheController extends Controller
      * @param  \Illuminate\Http\Request  $request
      * @return \Illuminate\Http\Response
      */
-    public function store(Request $request)
+    public function store(Request $request, Pedido $pedido)
     {
-        ProdutoDetalhe::create($request->all());
+        $regras = [
+            'produto_id' => 'exists:produtos,id'
+        ];
+        $feedback = [
+            'produto_id.exists' => 'O produto selecionado não existe'
+        ];
+        $request->validate($regras, $feedback);
+        $pedidoProduto = new PedidoProduto();
+        $pedidoProduto->pedido_id = $pedido->id;
+        $pedidoProduto->produto_id = $request->get('produto_id');
+        $pedidoProduto->save();
+        $msg = "Produto adicionado ao pedido com sucesso";
+        return redirect()->route('pedido-produto.create', ['pedido' => $pedido, 'msg' => $msg]);
     }
 
     /**
@@ -55,30 +68,24 @@ class ProdutoDetalheController extends Controller
     /**
      * Show the form for editing the specified resource.
      *
-     * @param  App\Models\produto_detalhe produto_detalhe
+     * @param  int  $id
      * @return \Illuminate\Http\Response
      */
     public function edit($id)
     {
-        $produto_detalhe = ItemDetalhe::with(['item'])->find($id);
-        $unidades = Unidade::all();
-        return view('app.produto_detalhe.edit', [
-            'produto_detalhe' => $produto_detalhe,
-            'unidades' => $unidades
-        ]);
+        //
     }
 
     /**
      * Update the specified resource in storage.
      *
      * @param  \Illuminate\Http\Request  $request
-     * @param  App\Models\produto_detalhe produto_detalhe
+     * @param  int  $id
      * @return \Illuminate\Http\Response
      */
-    public function update(Request $request, ProdutoDetalhe $produto_detalhe)
+    public function update(Request $request, $id)
     {
-        $produto_detalhe->update($request->All());
-        echo 'atualizado com sucesso';
+        //
     }
 
     /**

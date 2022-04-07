@@ -12,4 +12,15 @@ class Fornecedor extends Model
     use HasFactory;
     protected $table = 'fornecedores';
     protected $fillable = ['nome', 'email', 'uf', 'site'];
+
+    public function produtos()
+    {
+        //@param1- Modelo que implementa a tabela produtos
+        //@param2- chave estrangeira na tabela produtos
+        //param3 - chave primaria tabela fornecedor
+        return $this->hasMany('App\Models\Item', 'fornecedor_id', 'id');
+
+        //ou
+        // return $this->hasMany('App\Models\Item');
+    }
 }

@@ -5,6 +5,7 @@ namespace App\Http\Controllers;
 use App\Models\Produto;
 use App\Models\Unidade;
 use App\Models\Item;
+use App\Models\Fornecedor;
 use Illuminate\Http\Request;
 
 class ProdutoController extends Controller
@@ -16,7 +17,7 @@ class ProdutoController extends Controller
      */
     public function index(Request $request)
     {
-        $produtos = Item::with(['produtoDetalhe'])->paginate(10);
+        $produtos = Item::with(['produtoDetalhe', 'fornecedor'])->paginate(10);
         // foreach ($produtos as $key => $produto) {
         //     $produto_detalhe = ProdutoDetalhe::where('produto_id', $produto->id)->first();
         //     if (isset($produto_detalhe)) {
@@ -37,7 +38,8 @@ class ProdutoController extends Controller
     public function create()
     {
         $unidades = Unidade::All();
-        return view('app.produto.create', ['unidades' => $unidades]);
+        $fornecedores = Fornecedor::All();
+        return view('app.produto.create', ['unidades' => $unidades, 'fornecedores' => $fornecedores]);
     }
 
     /**
@@ -52,7 +54,8 @@ class ProdutoController extends Controller
             'nome' => 'min:2|max:40',
             'descricao' => 'required',
             'peso' => 'required| integer',
-            'unidade_id' => 'exists:unidades,id'
+            'unidade_id' => 'exists:unidades,id',
+            'fornecedor_id' => 'exists:fornecedores,id'
         ];
         $feedback = [
             'nome.min' => 'Campo nome precisa pelo menos de 2 caracteres',
@@ -61,7 +64,7 @@ class ProdutoController extends Controller
             'exists' => 'Campo invalido'
         ];
         $request->validate($regras, $feedback);
-        Produto::Create($request->all());
+        Item::Create($request->all());
         return redirect()->route('produto.index');
     }
 
@@ -84,8 +87,9 @@ class ProdutoController extends Controller
      */
     public function edit(Produto $produto)
     {
+        $fornecedores = Fornecedor::All();
         $unidades = Unidade::all();
-        return view('app.produto.edit', ['produto' => $produto, 'unidades' => $unidades]);
+        return view('app.produto.edit', ['produto' => $produto, 'unidades' => $unidades, 'fornecedores' => $fornecedores]);
     }
 
     /**
@@ -95,8 +99,22 @@ class ProdutoController extends Controller
      * @param  \App\Models\Produto  $produto
      * @return \Illuminate\Http\Response
      */
-    public function update(Request $request, Produto $produto)
+    public function update(Request $request, Item $produto)
     {
+        $regras = [
+            'nome' => 'min:2|max:40',
+            'descricao' => 'required',
+            'peso' => 'required| integer',
+            'unidade_id' => 'exists:unidades,id',
+            'fornecedor_id' => 'exists:fornecedores,id'
+        ];
+        $feedback = [
+            'nome.min' => 'Campo nome precisa pelo menos de 2 caracteres',
+            'required' => 'O campo :attribute é obrigatório',
+            'integer' => 'O campo deve ser um valor inteiro',
+            'exists' => 'Campo invalido'
+        ];
+        $request->validate($regras, $feedback);
         $produto->update($request->all());
         return redirect()->route('produto.show', ['produto' => $produto->id]);
     }

@@ -5,6 +5,15 @@
     <form method="post" action="{{ route('produto.store')}}">
 @endif
     @csrf
+    <select name = "fornecedor_id">
+        <option>Selecione a unidade de medida</option>
+        
+        @foreach($fornecedores as $f)
+            <option value = {{$f->id}} {{ ( $produto->fornecedor_id ?? old('fornecedor_id')) == $f->id ? 'selected' : '' }}>{{$f->nome}}</option>
+        @endforeach
+    </select>
+     {{$errors->has('fornecedor_id') ? $errors->first('fornecedor_id') : ""}}
+
     <input type="text" value ="{{ $produto->nome ?? old('nome')}}" name = "nome" placeholder="Nome" class="borda-preta"/>
     {{$errors->has('nome') ? $errors->first('nome') : ""}}
 
