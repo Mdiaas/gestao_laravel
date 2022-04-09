@@ -40,16 +40,17 @@ class PedidoProdutoController extends Controller
     public function store(Request $request, Pedido $pedido)
     {
         $regras = [
-            'produto_id' => 'exists:produtos,id'
+            'produto_id' => 'exists:produtos,id',
+            'quantidade' => 'required'
         ];
         $feedback = [
-            'produto_id.exists' => 'O produto selecionado não existe'
+            'produto_id.exists' => 'O produto selecionado não existe',
+            'quantidade.required' => 'O campo :attribute deve ter um valor válido'
         ];
         $request->validate($regras, $feedback);
-        $pedidoProduto = new PedidoProduto();
-        $pedidoProduto->pedido_id = $pedido->id;
-        $pedidoProduto->produto_id = $request->get('produto_id');
-        $pedidoProduto->save();
+        $pedido->produtos()->attach($request->get('produto_id'), [
+            'quantidade' => $request->get('quantidade')
+        ]);
         $msg = "Produto adicionado ao pedido com sucesso";
         return redirect()->route('pedido-produto.create', ['pedido' => $pedido, 'msg' => $msg]);
     }
@@ -94,8 +95,9 @@ class PedidoProdutoController extends Controller
      * @param  int  $id
      * @return \Illuminate\Http\Response
      */
-    public function destroy($id)
+    public function destroy(PedidoProduto $pedidoProduto, $pedido_id)
     {
-        //
+        $pedidoProduto->delete();
+        return redirect()->route('pedido-produto.create', ['pedido' => $pedido_id]);
     }
 }
